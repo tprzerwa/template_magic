@@ -15,6 +15,8 @@ template <typename T> struct AlwaysTrue : std::true_type {};
 
 template <typename T> struct AlwaysFalse : std::false_type {};
 
+template <typename T> struct IsInt : std::is_same<T, int> {};
+
 struct Named { std::string name() const noexcept { return "Name"; } };
 
 struct FakeIntNamed { int name() const noexcept { return 0; } };
@@ -30,23 +32,18 @@ struct UnNamed {};
 using namespace unittest;
 using namespace tplm;
 
-TEST_CASE("TEST all_satisfy")
-{
-    REQUIRE( all_of<AlwaysTrue, int>::value );
-    REQUIRE( all_of<AlwaysTrue, int, float>::value );
-    REQUIRE( all_of<AlwaysTrue, int, float, bool>::value );
 
-    REQUIRE( !all_of<AlwaysFalse, int>::value );
-    REQUIRE( !all_of<AlwaysFalse, int, float>::value );
-    REQUIRE( !all_of<AlwaysFalse, int, float, bool>::value );
-}
-
-TEST_CASE("TEST has_method_name")
+TEST_CASE("TEST get")
 {
-    REQUIRE( has_method_name<Named>::value );
-    REQUIRE( !has_method_name<UnNamed>::value );
-    REQUIRE( !has_method_name<FakeIntNamed>::value );
-    REQUIRE( !has_method_name<FakeVoidNamed>::value );
+    REQUIRE( std::is_same<get_t<0ul, float, int, int, double, bool>, float>::value );
+
+    REQUIRE( std::is_same<get_t<1ul, float, int, int, double, bool>, int>::value );
+
+    REQUIRE( std::is_same<get_t<3ul, float, int, int, double, bool>, double>::value );
+
+    REQUIRE( std::is_same<get_t<4ul, float, int, int, double, bool>, bool>::value );
+
+    REQUIRE( std::is_same<get_t<5ul, float, int, int, double, bool>, none>::value );
 }
 
 TEST_CASE("TEST find")
@@ -66,3 +63,57 @@ TEST_CASE("TEST find")
     REQUIRE( find_v<unsigned, float, int, int, double, bool> == 5ul );
     REQUIRE( std::is_same<find_t<unsigned, float, int, int, double, bool>, none>::value );
 }
+
+TEST_CASE("TEST all_of")
+{
+    REQUIRE( all_of<AlwaysTrue, int>::value );
+    REQUIRE( all_of<AlwaysTrue, int, float>::value );
+    REQUIRE( all_of<AlwaysTrue, int, float, bool>::value );
+
+    REQUIRE( !all_of<AlwaysFalse, int>::value );
+    REQUIRE( !all_of<AlwaysFalse, int, float>::value );
+    REQUIRE( !all_of<AlwaysFalse, int, float, bool>::value );
+
+    REQUIRE( all_of<IsInt, int>::value );
+    REQUIRE( !all_of<IsInt, int, float>::value );
+    REQUIRE( !all_of<IsInt, int, float, bool>::value );
+}
+
+TEST_CASE("TEST any_of")
+{
+    REQUIRE( all_of<AlwaysTrue, int>::value );
+    REQUIRE( all_of<AlwaysTrue, int, float>::value );
+    REQUIRE( all_of<AlwaysTrue, int, float, bool>::value );
+
+    REQUIRE( !all_of<AlwaysFalse, int>::value );
+    REQUIRE( !all_of<AlwaysFalse, int, float>::value );
+    REQUIRE( !all_of<AlwaysFalse, int, float, bool>::value );
+
+    REQUIRE( all_of<IsInt, int>::value );
+    REQUIRE( all_of<IsInt, int, float>::value );
+    REQUIRE( all_of<IsInt, int, float, bool>::value );
+}
+
+TEST_CASE("TEST none_of")
+{
+    REQUIRE( !all_of<AlwaysTrue, int>::value );
+    REQUIRE( !all_of<AlwaysTrue, int, float>::value );
+    REQUIRE( !all_of<AlwaysTrue, int, float, bool>::value );
+
+    REQUIRE( all_of<AlwaysFalse, int>::value );
+    REQUIRE( all_of<AlwaysFalse, int, float>::value );
+    REQUIRE( all_of<AlwaysFalse, int, float, bool>::value );
+
+    REQUIRE( !all_of<IsInt, int>::value );
+    REQUIRE( !all_of<IsInt, int, float>::value );
+    REQUIRE( !all_of<IsInt, int, float, bool>::value );
+}
+
+TEST_CASE("TEST has_method_name")
+{
+    REQUIRE( has_method_name<Named>::value );
+    REQUIRE( !has_method_name<UnNamed>::value );
+    REQUIRE( !has_method_name<FakeIntNamed>::value );
+    REQUIRE( !has_method_name<FakeVoidNamed>::value );
+}
+

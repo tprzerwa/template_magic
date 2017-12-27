@@ -12,56 +12,47 @@ namespace detail
 
 
 template <std::size_t I, typename T, typename... Us>
-struct Index;
+struct find_impl;
 
 template <std::size_t I, typename T>
-struct Index<I, T> : std::integral_constant<std::size_t, I> {};
+struct find_impl<I, T> : std::integral_constant<std::size_t, I> {};
 
 template <std::size_t I, typename T, typename... Us>
-struct Index<I, T, T, Us...> : std::integral_constant<std::size_t, I> {};
+struct find_impl<I, T, T, Us...> : std::integral_constant<std::size_t, I> {};
 
 template <std::size_t I, typename T, typename U, typename... Us>
-struct Index<I, T, U, Us...> : Index<I+1, T, Us...> {};
+struct find_impl<I, T, U, Us...> : find_impl<I+1, T, Us...> {};
 
 
 
-
-template<bool B, template<typename...> class Predicate>
-struct Initial;
-
-template <template<typename...> class Predicate>
-struct Initial<false, Predicate>
-{
-    template <typename...>
-    struct And : std::false_type {};
-
-    template <typename... Us>
-    struct Or;
-
-    template <typename U>
-    struct Or<U> : std::integral_constant<bool, Predicate<U>::value> {};
-
-    template <typename U, typename... Us>
-    struct Or<U, Us...>
-        : Initial< Predicate<U>::value, Predicate >::template Or<Us...> {};
-};
+template <bool B, template<typename...> class Predicate, typename... Ts>
+struct all_of_impl;
 
 template <template<typename...> class Predicate>
-struct Initial<true, Predicate>
-{
-    template <typename... Us>
-    struct And;
+struct all_of_impl<true, Predicate> : std::true_type {};
 
-    template <typename U>
-    struct And<U> : std::integral_constant<bool, Predicate<U>::value> {};
+template <template<typename...> class Predicate, typename T, typename... Ts>
+struct all_of_impl<true, Predicate, T, Ts...> : all_of_impl<Predicate<T>::value, Predicate, Ts...> {};
 
-    template <typename U, typename... Us>
-    struct And<U, Us...>
-        : Initial< Predicate<U>::value, Predicate >::template And<Us...> {};
+template <template<typename...> class Predicate, typename... Ts>
+struct all_of_impl<false, Predicate, Ts...> : std::false_type {};
 
-    template<typename...>
-    struct Or : std::true_type {};
-};
+
+
+template <bool B, template<typename...> class Predicate, typename... Ts>
+struct any_of_impl;
+
+template <template<typename...> class Predicate>
+struct any_of_impl<false, Predicate> : std::false_type {};
+
+template <template<typename...> class Predicate, typename T, typename... Ts>
+struct any_of_impl<false, Predicate, T, Ts...> : any_of_impl<Predicate<T>::value, Predicate, Ts...> {};
+
+template <template<typename...> class Predicate, typename... Ts>
+struct any_of_impl<true, Predicate, Ts...> : std::true_type {};
+
+
+
 
 
 }  // namespace detail
