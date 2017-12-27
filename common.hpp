@@ -2,6 +2,9 @@
 #define TPLM_COMMON_HPP_
 
 
+#include <type_traits>
+
+
 namespace tplm
 {
 
@@ -20,32 +23,35 @@ struct swallow
 
 
 
+struct no_such_member : public std::exception {};
+
+
+
 template <bool B, typename T, typename U>
 struct if_expr;
 
 template <typename T, typename U>
-struct if_expr<true, T, U>
+struct if_expr<true, T, U> : std::true_type
 {
-    constexpr static bool value = true;
     using type = T;
 };
 
 template <typename T, typename U>
-struct if_expr<false, T, U>
+struct if_expr<false, T, U> : std::false_type
 {
-    constexpr static bool value = true;
     using type = U;
 };
 
 template <bool B, typename T, typename U>
 using if_expr_t = typename if_expr<B, T, U>::type;
 
+
+#if __cplusplus >= 201402L
+
 template <bool B, typename T, typename U>
 constexpr static bool if_expr_v = if_expr<B, T, U>::value;
 
-
-
-struct no_such_member : public std::exception {};
+#endif
 
 
 
