@@ -32,10 +32,7 @@ template <bool B, std::size_t I, template<typename...> class Predicate, typename
 struct find_if_impl;
 
 template <std::size_t I, template<typename...> class Predicate>
-struct find_if_impl<true, I, Predicate> : std::integral_constant<std::size_t, I> {};
-
-template <std::size_t I, template<typename...> class Predicate>
-struct find_if_impl<false, I, Predicate> : std::integral_constant<std::size_t, I> {};
+struct find_if_impl<false, I, Predicate> : std::integral_constant<std::size_t, I+1> {};
 
 template <std::size_t I, template<typename...> class Predicate, typename... Us>
 struct find_if_impl<true, I, Predicate, Us...> : std::integral_constant<std::size_t, I> {};
@@ -45,7 +42,7 @@ struct find_if_impl<false, I, Predicate, U, Us...>
     : find_if_impl<Predicate<U>::value, I+1, Predicate, Us...> {};
 
 template <template<typename...> class Predicate, typename U, typename... Us>
-using find_if = find_if_impl<Predicate<U>::value, 0ul, Predicate, U, Us...>;
+using find_if = find_if_impl<Predicate<U>::value, 0ul, Predicate, Us...>;
 
 
 
@@ -80,8 +77,6 @@ struct any_of_impl<true, Predicate, Ts...> : std::true_type {};
 
 template <template<typename...> class Predicate, typename... Ts>
 using any_of = any_of_impl<false, Predicate, Ts...>;
-
-
 
 
 

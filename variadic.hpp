@@ -14,8 +14,8 @@ namespace tplm
 template <std::size_t N, typename... Ts>
 struct get;
 
-template <>
-struct get<0ul>
+template <std::size_t N>
+struct get<N>
 {
     using type = none;
 };

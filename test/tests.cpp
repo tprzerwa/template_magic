@@ -21,7 +21,7 @@ template <typename T> struct IsInt : std::is_same<T, int> {};
 
 template <typename T> struct IsFloat : std::is_same<T, float> {};
 
-template <typename T> struct IsDouble : std::is_same<T, float> {};
+template <typename T> struct IsDouble : std::is_same<T, double> {};
 
 template <typename T> struct IsBool : std::is_same<T, bool> {};
 
