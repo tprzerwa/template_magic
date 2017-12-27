@@ -26,40 +26,40 @@ struct Index<I, T, U, Us...> : Index<I+1, T, Us...> {};
 
 
 
-template<bool B>
+template<bool B, template<typename...> class Predicate>
 struct Initial;
 
-template<>
-struct Initial<false>
+template <template<typename...> class Predicate>
+struct Initial<false, Predicate>
 {
-    template<template<typename> class Predicate, typename...>
+    template <typename...>
     struct And : std::false_type {};
 
-    template<template<typename> class Predicate, typename... Us>
+    template <typename... Us>
     struct Or;
 
-    template<template<typename> class Predicate, typename U>
-    struct Or<Predicate, U> : std::integral_constant<bool, Predicate<U>::value> {};
+    template <typename U>
+    struct Or<U> : std::integral_constant<bool, Predicate<U>::value> {};
 
-    template<template<typename> class Predicate, typename U, typename... Us>
-    struct Or<Predicate, U, Us...>
-        : Initial< Predicate<U>::value >::template Or<Predicate, Us...> {};
+    template <typename U, typename... Us>
+    struct Or<U, Us...>
+        : Initial< Predicate<U>::value, Predicate >::template Or<Us...> {};
 };
 
-template<>
-struct Initial<true>
+template <template<typename...> class Predicate>
+struct Initial<true, Predicate>
 {
-    template<template<typename> class Predicate, typename... Us>
+    template <typename... Us>
     struct And;
 
-    template<template<typename> class Predicate, typename U>
-    struct And<Predicate, U> : std::integral_constant<bool, Predicate<U>::value> {};
+    template <typename U>
+    struct And<U> : std::integral_constant<bool, Predicate<U>::value> {};
 
-    template<template<typename> class Predicate, typename U, typename... Us>
-    struct And<Predicate, U, Us...>
-        : Initial< Predicate<U>::value >::template And<Predicate, Us...> {};
+    template <typename U, typename... Us>
+    struct And<U, Us...>
+        : Initial< Predicate<U>::value, Predicate >::template And<Us...> {};
 
-    template<template<typename> class Predicate, typename...>
+    template<typename...>
     struct Or : std::true_type {};
 };
 

@@ -59,36 +59,36 @@ using find_t = typename find<T, Ts...>::type;
 
 
 
-template <template<typename> class Predicate, typename... Ts>
+template <template<typename...> class Predicate, typename... Ts>
 struct all_of
 {
-    constexpr static bool value = detail::Initial<true>::And<Predicate, Ts...>::value;
+    constexpr static bool value = detail::Initial<true, Predicate>::template And<Ts...>::value;
 };
 
-template <template<typename> class Predicate, typename... Ts>
+template <template<typename...> class Predicate, typename... Ts>
 constexpr static bool all_of_v = all_of<Predicate, Ts...>::value;
 
 
 
-template <template<typename> class Predicate, typename... Ts>
-struct any_of
-{
-    constexpr static bool value = detail::Initial<false>::Or<Predicate, Ts...>::value;
-};
+// template <template<typename> class Predicate, typename... Ts>
+// struct any_of
+// {
+//     constexpr static bool value = detail::Initial<false, Predicate>::Or<Predicate, Ts...>::value;
+// };
 
-template <template<typename> class Predicate, typename... Ts>
-constexpr static bool any_of_v = any_of<Predicate, Ts...>::value;
+// template <template<typename> class Predicate, typename... Ts>
+// constexpr static bool any_of_v = any_of<Predicate, Ts...>::value;
 
 
 
-template <template<typename> class Predicate, typename... Ts>
-struct none_of
-{
-    constexpr static bool value = !any_of_v<Predicate, Ts...>;
-};
+// template <template<typename> class Predicate, typename... Ts>
+// struct none_of
+// {
+//     constexpr static bool value = !any_of_v<Predicate, Ts...>;
+// };
 
-template <template<typename> class Predicate, typename... Ts>
-constexpr static bool anone_of_v = none_of<Predicate, Ts...>::value;
+// template <template<typename> class Predicate, typename... Ts>
+// constexpr static bool anone_of_v = none_of<Predicate, Ts...>::value;
 
 
 }  // namespace tplm

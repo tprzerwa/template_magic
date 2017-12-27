@@ -1,7 +1,8 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-#include "../stm_detail.hpp"
+
+#include "../sfinae.hpp"
 #include "../variadic.hpp"
 
 #include <type_traits>
@@ -27,7 +28,6 @@ struct UnNamed {};
 
 
 using namespace unittest;
-using namespace stm::detail;
 using namespace tplm;
 
 TEST_CASE("TEST all_satisfy")

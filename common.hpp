@@ -6,6 +6,9 @@ namespace tplm
 {
 
 
+struct some {};
+
+
 struct none {};
 
 
@@ -39,6 +42,10 @@ using if_expr_t = typename if_expr<B, T, U>::type;
 
 template <bool B, typename T, typename U>
 constexpr static bool if_expr_v = if_expr<B, T, U>::value;
+
+
+
+struct no_such_member : public std::exception {};
 
 
 
