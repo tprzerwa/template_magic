@@ -1,11 +1,13 @@
 #define CATCH_CONFIG_MAIN
+
+
 #include "catch.hpp"
 
+#include <string>
+#include <type_traits>
 
 #include "../sfinae.hpp"
 #include "../variadic.hpp"
-
-#include <type_traits>
 
 
 namespace unittest
@@ -16,6 +18,14 @@ template <typename T> struct AlwaysTrue : std::true_type {};
 template <typename T> struct AlwaysFalse : std::false_type {};
 
 template <typename T> struct IsInt : std::is_same<T, int> {};
+
+template <typename T> struct IsFloat : std::is_same<T, float> {};
+
+template <typename T> struct IsDouble : std::is_same<T, float> {};
+
+template <typename T> struct IsBool : std::is_same<T, bool> {};
+
+template <typename T> struct IsString : std::is_same<T, std::string> {};
 
 struct Named { std::string name() const noexcept { return "Name"; } };
 
@@ -64,49 +74,97 @@ TEST_CASE("TEST find")
     REQUIRE( std::is_same<find_t<unsigned, float, int, int, double, bool>, none>::value );
 }
 
+TEST_CASE("TEST find_if")
+{
+    REQUIRE( find_if_v<AlwaysTrue, float, int, int, double, bool> == 0ul );
+    REQUIRE( std::is_same<find_if_t<AlwaysTrue, float, int, int, double, bool>, float>::value );
+
+    REQUIRE( find_if_v<AlwaysFalse, float, int, int, double, bool> == 5ul );
+    REQUIRE( std::is_same<find_if_t<AlwaysFalse, float, int, int, double, bool>, none>::value );
+
+    REQUIRE( find_if_v<IsInt, float, int, int, double, bool> == 1ul );
+    REQUIRE( std::is_same<find_if_t<IsInt, float, int, int, double, bool>, int>::value );
+
+    REQUIRE( find_if_v<IsFloat, float, int, int, double, bool> == 0ul );
+    REQUIRE( std::is_same<find_if_t<IsFloat, float, int, int, double, bool>, float>::value );
+
+    REQUIRE( find_if_v<IsDouble, float, int, int, double, bool> == 3ul );
+    REQUIRE( std::is_same<find_if_t<IsDouble, float, int, int, double, bool>, double>::value );
+
+    REQUIRE( find_if_v<IsBool, float, int, int, double, bool> == 4ul );
+    REQUIRE( std::is_same<find_if_t<IsBool, float, int, int, double, bool>, bool>::value );
+
+    REQUIRE( find_if_v<IsString, float, int, int, double, bool> == 5ul );
+    REQUIRE( std::is_same<find_if_t<IsString, float, int, int, double, bool>, none>::value );
+}
+
 TEST_CASE("TEST all_of")
 {
-    REQUIRE( all_of<AlwaysTrue, int>::value );
-    REQUIRE( all_of<AlwaysTrue, int, float>::value );
-    REQUIRE( all_of<AlwaysTrue, int, float, bool>::value );
+    REQUIRE( all_of_v<AlwaysTrue, int> );
+    REQUIRE( all_of_v<AlwaysTrue, int, float> );
+    REQUIRE( all_of_v<AlwaysTrue, int, float, bool> );
 
-    REQUIRE( !all_of<AlwaysFalse, int>::value );
-    REQUIRE( !all_of<AlwaysFalse, int, float>::value );
-    REQUIRE( !all_of<AlwaysFalse, int, float, bool>::value );
+    REQUIRE( !all_of_v<AlwaysFalse, int> );
+    REQUIRE( !all_of_v<AlwaysFalse, int, float> );
+    REQUIRE( !all_of_v<AlwaysFalse, int, float, bool> );
 
-    REQUIRE( all_of<IsInt, int>::value );
-    REQUIRE( !all_of<IsInt, int, float>::value );
-    REQUIRE( !all_of<IsInt, int, float, bool>::value );
+    REQUIRE( all_of_v<IsInt, int> );
+    REQUIRE( !all_of_v<IsInt, int, float> );
+    REQUIRE( !all_of_v<IsInt, int, float, bool> );
+
+    REQUIRE( !all_of_v<IsFloat, int> );
+    REQUIRE( !all_of_v<IsFloat, int, float> );
+    REQUIRE( !all_of_v<IsFloat, int, float, bool> );
+
+    REQUIRE( !all_of_v<IsString, int> );
+    REQUIRE( !all_of_v<IsString, int, float> );
+    REQUIRE( !all_of_v<IsString, int, float, bool> );
 }
 
 TEST_CASE("TEST any_of")
 {
-    REQUIRE( all_of<AlwaysTrue, int>::value );
-    REQUIRE( all_of<AlwaysTrue, int, float>::value );
-    REQUIRE( all_of<AlwaysTrue, int, float, bool>::value );
+    REQUIRE( any_of_v<AlwaysTrue, int> );
+    REQUIRE( any_of_v<AlwaysTrue, int, float> );
+    REQUIRE( any_of_v<AlwaysTrue, int, float, bool> );
 
-    REQUIRE( !all_of<AlwaysFalse, int>::value );
-    REQUIRE( !all_of<AlwaysFalse, int, float>::value );
-    REQUIRE( !all_of<AlwaysFalse, int, float, bool>::value );
+    REQUIRE( !any_of_v<AlwaysFalse, int> );
+    REQUIRE( !any_of_v<AlwaysFalse, int, float> );
+    REQUIRE( !any_of_v<AlwaysFalse, int, float, bool> );
 
-    REQUIRE( all_of<IsInt, int>::value );
-    REQUIRE( all_of<IsInt, int, float>::value );
-    REQUIRE( all_of<IsInt, int, float, bool>::value );
+    REQUIRE( any_of_v<IsInt, int> );
+    REQUIRE( any_of_v<IsInt, int, float> );
+    REQUIRE( any_of_v<IsInt, int, float, bool> );
+
+    REQUIRE( !any_of_v<IsFloat, int> );
+    REQUIRE( any_of_v<IsFloat, int, float> );
+    REQUIRE( any_of_v<IsFloat, int, float, bool> );
+
+    REQUIRE( !any_of_v<IsString, int> );
+    REQUIRE( !any_of_v<IsString, int, float> );
+    REQUIRE( !any_of_v<IsString, int, float, bool> );
 }
 
 TEST_CASE("TEST none_of")
 {
-    REQUIRE( !all_of<AlwaysTrue, int>::value );
-    REQUIRE( !all_of<AlwaysTrue, int, float>::value );
-    REQUIRE( !all_of<AlwaysTrue, int, float, bool>::value );
+    REQUIRE( !none_of_v<AlwaysTrue, int> );
+    REQUIRE( !none_of_v<AlwaysTrue, int, float> );
+    REQUIRE( !none_of_v<AlwaysTrue, int, float, bool> );
 
-    REQUIRE( all_of<AlwaysFalse, int>::value );
-    REQUIRE( all_of<AlwaysFalse, int, float>::value );
-    REQUIRE( all_of<AlwaysFalse, int, float, bool>::value );
+    REQUIRE( none_of_v<AlwaysFalse, int> );
+    REQUIRE( none_of_v<AlwaysFalse, int, float> );
+    REQUIRE( none_of_v<AlwaysFalse, int, float, bool> );
 
-    REQUIRE( !all_of<IsInt, int>::value );
-    REQUIRE( !all_of<IsInt, int, float>::value );
-    REQUIRE( !all_of<IsInt, int, float, bool>::value );
+    REQUIRE( !none_of_v<IsInt, int> );
+    REQUIRE( !none_of_v<IsInt, int, float> );
+    REQUIRE( !none_of_v<IsInt, int, float, bool> );
+
+    REQUIRE( none_of_v<IsFloat, int> );
+    REQUIRE( !none_of_v<IsFloat, int, float> );
+    REQUIRE( !none_of_v<IsFloat, int, float, bool> );
+
+    REQUIRE( none_of_v<IsString, int> );
+    REQUIRE( none_of_v<IsString, int, float> );
+    REQUIRE( none_of_v<IsString, int, float, bool> );
 }
 
 TEST_CASE("TEST has_method_name")
