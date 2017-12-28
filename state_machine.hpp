@@ -58,6 +58,8 @@ public:
             state_);
     }
 
+    template <typename /* created only if any state has method name() */
+        = typename std::enable_if<any_of<has_method_name, States...>::value>::type>
     std::string state_name() const noexcept(states_printable)
     {
         return std::visit(detail::name_handler<states_printable>{}, state_);

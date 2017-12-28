@@ -11,8 +11,8 @@ struct overloaded;
 template <typename T>
 struct overloaded<T> : public T
 {
-    overloaded(T && t)
-        : T{ std::forward<T>(t) }
+    overloaded(T t)
+        : T{ std::move(t) }
     {
     }
 
@@ -22,9 +22,9 @@ struct overloaded<T> : public T
 template <typename T, typename... Ts>
 struct overloaded<T, Ts...> : public T, public overloaded<Ts...>
 {
-    overloaded(T && t, Ts && ... ts)
-        : T{ std::forward<T>(t) }
-        , overloaded<Ts...>{ std::forward<Ts>(ts)... }
+    overloaded(T t, Ts ... ts)
+        : T{ std::move(t) }
+        , overloaded<Ts...>( std::move(ts)... )
     {
     }
 
@@ -36,7 +36,7 @@ struct overloaded<T, Ts...> : public T, public overloaded<Ts...>
 template <typename... Ts>
 overloaded<Ts...> make_overloaded(Ts && ... ts)
 {
-    return overloaded<Ts...>( std::forward<Ts>(ts)... );
+    return overloaded<Ts...>( ts... );
 }
 
 }  // namespace tplm

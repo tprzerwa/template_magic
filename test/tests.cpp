@@ -8,7 +8,10 @@
 
 #include "../common.hpp"
 #include "../sfinae.hpp"
+#include "../state_machine.hpp"
 #include "../variadic.hpp"
+
+#include "states.hpp"
 
 
 namespace unittest
@@ -186,3 +189,115 @@ TEST_CASE("TEST has_method_name")
     REQUIRE( !has_method_name<FakeVoidNamed>::value );
 }
 
+TEST_CASE("TEST state_machine with printable states and nothrow transitions")
+{
+    auto sm = state_machine<silent_on_bad_transition,
+        StartedPrintableState, StoppedPrintableState>(StoppedPrintableState{});
+
+    REQUIRE( sm.in_state<StoppedPrintableState>() );
+    REQUIRE( sm.state_name() == StoppedPrintableState{}.name() );
+
+    sm.handle(Stop{});
+    REQUIRE( sm.in_state<StoppedPrintableState>() );
+    REQUIRE( sm.state_name() == StoppedPrintableState{}.name() );
+
+    sm.handle(Start{});
+    REQUIRE( sm.in_state<StartedPrintableState>() );
+    REQUIRE( sm.state_name() == StartedPrintableState{}.name() );
+
+    sm.handle(Start{});
+    REQUIRE( sm.in_state<StartedPrintableState>() );
+    REQUIRE( sm.state_name() == StartedPrintableState{}.name() );
+
+    sm.handle(Stop{});
+    REQUIRE( sm.in_state<StoppedPrintableState>() );
+    REQUIRE( sm.state_name() == StoppedPrintableState{}.name() );
+}
+
+TEST_CASE("TEST state_machine with not printable states and nothrow transitions")
+{
+    int exception_count = 0;
+    auto sm = state_machine<silent_on_bad_transition,
+        StartedNotPrintableState, StoppedNotPrintableState>(StoppedNotPrintableState{});
+
+    REQUIRE( sm.in_state<StoppedNotPrintableState>() );
+    REQUIRE( sm.state_name() == StoppedNotPrintableState{}.name() );
+
+    sm.handle(Stop{});
+    REQUIRE( sm.in_state<StoppedNotPrintableState>() );
+    REQUIRE( sm.state_name() == StoppedNotPrintableState{}.name() );
+
+    sm.handle(Start{});
+    REQUIRE( sm.in_state<StartedNotPrintableState>() );
+    try
+    {
+        sm.state_name();  // should throw tplm::no_such_member
+        REQUIRE( false ); 
+    }
+    catch (no_such_member&)
+    {
+        exception_count++;
+    }
+
+    sm.handle(Start{});
+    REQUIRE( sm.in_state<StartedNotPrintableState>() );
+    try
+    {
+        sm.state_name();  // should throw tplm::no_such_member
+        REQUIRE( false );
+    }
+    catch (no_such_member&)
+    {
+        exception_count++;
+    }
+
+    sm.handle(Stop{});
+    REQUIRE( sm.in_state<StoppedNotPrintableState>() );
+    REQUIRE( sm.state_name() == StoppedNotPrintableState{}.name() );
+
+    REQUIRE( exception_count == 2 );
+}
+
+TEST_CASE("TEST state_machine with printable states and throwing transitions")
+{
+    int exception_count = 0;
+    auto sm = state_machine<throw_on_bad_transition,
+        StartedPrintableState, StoppedPrintableState>(StoppedPrintableState{});
+
+    REQUIRE( sm.in_state<StoppedPrintableState>() );
+    REQUIRE( sm.state_name() == StoppedPrintableState{}.name() );
+
+    try
+    {
+        sm.handle(Stop{});  // should throw tplm::invalid_transition
+        REQUIRE( false );
+    }
+    catch (invalid_transition&)
+    {
+        exception_count++;
+    }
+    REQUIRE( sm.in_state<StoppedPrintableState>() );
+    REQUIRE( sm.state_name() == StoppedPrintableState{}.name() );
+
+    sm.handle(Start{});
+    REQUIRE( sm.in_state<StartedPrintableState>() );
+    REQUIRE( sm.state_name() == StartedPrintableState{}.name() );
+
+    try
+    {
+        sm.handle(Start{});  // should throw tplm::invalid_transition
+        REQUIRE( false );
+    }
+    catch (invalid_transition&)
+    {
+        exception_count++;
+    }
+    REQUIRE( sm.in_state<StartedPrintableState>() );
+    REQUIRE( sm.state_name() == StartedPrintableState{}.name() );
+
+    sm.handle(Stop{});
+    REQUIRE( sm.in_state<StoppedPrintableState>() );
+    REQUIRE( sm.state_name() == StoppedPrintableState{}.name() );
+
+    REQUIRE( exception_count == 2 );
+}
