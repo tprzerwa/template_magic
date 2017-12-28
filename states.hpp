@@ -9,41 +9,35 @@ struct Start {};
 struct Stop {};
 
 
-struct State
-{
-    virtual std::string name() const = 0;
-    virtual ~State() = default;
-};
-
 
 struct Started;
 
-struct Stopped : public State
+struct Stopped
 {
-    std::string name() const override;
-    auto handle(Start) const;
+    std::string name() const;
+    auto handle(const Start&) const;
 };
 
-struct Started : public State
+struct Started
 {
-    std::string name() const override;
-    auto handle(Stop) const;
+    // std::string name() const;
+    auto handle(const Stop&) const;
 };
 
-auto Started::handle(Stop) const
+auto Started::handle(const Stop&) const
 {
     return Stopped{};
 }
 
-auto Stopped::handle(Start) const
+auto Stopped::handle(const Start&) const
 {
     return Started{};
 }
 
-std::string Started::name() const
-{
-    return "Started";
-}
+// std::string Started::name() const
+// {
+//     return "Started";
+// }
 
 std::string Stopped::name() const
 {
@@ -51,9 +45,9 @@ std::string Stopped::name() const
 }
 
 
-std::ostream& operator<<(std::ostream& os, const State& state)
-{
-    return os << state.name();
-}
+// std::ostream& operator<<(std::ostream& os, const State& state)
+// {
+//     return os << state.name();
+// }
 
 #endif  // STATES_HPP_

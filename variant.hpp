@@ -5,18 +5,8 @@
 namespace tplm
 {
 
-template <typename T, typename... Ts>
-struct overloaded : public T, public overloaded<Ts...>
-{
-    overloaded(T && t, Ts && ... ts)
-        : T{ std::forward<T>(t) }
-        , overloaded<Ts...>{ std::forward<Ts>(ts)... }
-    {
-    }
-
-    using T::operator();
-    using overloaded<Ts...>::operator();
-};
+template <typename... Ts>
+struct overloaded;
 
 template <typename T>
 struct overloaded<T> : public T
@@ -28,6 +18,20 @@ struct overloaded<T> : public T
 
     using T::operator();
 };
+
+template <typename T, typename... Ts>
+struct overloaded<T, Ts...> : public T, public overloaded<Ts...>
+{
+    overloaded(T && t, Ts && ... ts)
+        : T{ std::forward<T>(t) }
+        , overloaded<Ts...>{ std::forward<Ts>(ts)... }
+    {
+    }
+
+    using T::operator();
+    using overloaded<Ts...>::operator();
+};
+
 
 template <typename... Ts>
 overloaded<Ts...> make_overloaded(Ts && ... ts)

@@ -58,7 +58,7 @@ using find_if_t = typename find_if<Predicate, T, Ts...>::type;
 
 template <template<typename...> class Predicate, typename... Ts>
 struct all_of
-	: std::integral_constant<bool,  detail::all_of<Predicate, Ts...>::value > {};
+    : std::integral_constant<bool,  detail::all_of<Predicate, Ts...>::value > {};
 
 
 template <template<typename> class Predicate, typename... Ts>

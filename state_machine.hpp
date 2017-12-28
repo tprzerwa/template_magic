@@ -49,47 +49,22 @@ public:
     void handle(Event&& event) noexcept(TransitionPolicy::safe)
     {
         std::visit(
-            tplm::make_overloaded(
-                [&](auto&& state) noexcept
-                    -> decltype(state.handle(std::forward<Event>(event)), void())
-                    {
-                        state_ = state.handle(std::forward<Event>(event));
-                    },
-                [](auto&&... args)
-                    {
-                        handle_undefined_transition(args...);
-                    }),
+            make_overloaded(
+                detail::transition_handler<state_machine, Event>(this, std::forward<Event>(event)),
+                detail::undefined_transition_handler<TransitionPolicy::safe>{}),
             state_);
     }
 
-    auto state_name() const
-        -> decltype(all_of_v<has_method_name, States...>, std::string())
+    std::string state_name() const noexcept(all_of<has_method_name, States...>::value)
     {
         return std::visit(
-            make_overloaded(
-                [&](auto&& state) -> decltype(state.name(), std::string())
-                    {
-                        return state.name();
-                    },
-                [](auto&&... args)
-                    {
-                        swallow(args...);
-                        throw no_such_member{};
-                    }),
+            detail::name_handler<all_of<has_method_name, States...>::value>{},
             state_);
     }
 
 private:
-
-    template <typename... Args>
-    constexpr static void handle_undefined_transition(Args && ... args) noexcept(TransitionPolicy::safe)
-    {
-        if constexpr(!TransitionPolicy::safe)
-        { 
-            throw invalid_transition{};
-        }
-        swallow(args...);
-    }
+    template <typename StateMachine, typename Event>
+    friend struct detail::transition_handler;
 
     std::variant<States...> state_;
 };
