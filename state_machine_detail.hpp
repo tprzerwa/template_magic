@@ -6,7 +6,6 @@
 #include <type_traits>
 
 #include "common.hpp"
-#include "sfinae.hpp"
 
 
 namespace tplm
@@ -27,7 +26,7 @@ struct transition_handler<StateMachine, Event, true>
     Event event_;
 
     transition_handler(StateMachine *machine, Event&& event)
-        : machine_(machine), event_(std::forward<Event>(event)) {}
+        : machine_{machine}, event_(std::forward<Event>(event)) {}
 
     ~transition_handler() = default;
 
@@ -46,7 +45,7 @@ struct transition_handler<StateMachine, Event, false>
     const Event& event_;
 
     transition_handler(StateMachine *machine, const Event& event)
-        : machine_(machine), event_(event) {}
+        : machine_{machine}, event_(event) {}
 
     ~transition_handler() = default;
 

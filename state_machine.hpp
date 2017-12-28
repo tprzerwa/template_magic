@@ -32,6 +32,9 @@ struct invalid_transition;
 template <typename TransitionPolicy, typename... States>
 class state_machine
 {
+constexpr static bool silent_transition = TransitionPolicy::safe;
+constexpr static bool states_printable = all_of<has_method_name, States...>::value;
+
 public:
 
     state_machine(std::variant<States...> state)
@@ -42,24 +45,22 @@ public:
     template <typename State>
     bool in_state() const noexcept
     {
-        return state_.index() == tplm::find_v<State, States...>;
+        return state_.index() == tplm::find<State, States...>::value;
     }
 
     template <typename Event>
-    void handle(Event&& event) noexcept(TransitionPolicy::safe)
+    void handle(Event&& event) noexcept(silent_transition)
     {
         std::visit(
             make_overloaded(
                 detail::transition_handler<state_machine, Event>(this, std::forward<Event>(event)),
-                detail::undefined_transition_handler<TransitionPolicy::safe>{}),
+                detail::undefined_transition_handler<silent_transition>{}),
             state_);
     }
 
-    std::string state_name() const noexcept(all_of<has_method_name, States...>::value)
+    std::string state_name() const noexcept(states_printable)
     {
-        return std::visit(
-            detail::name_handler<all_of<has_method_name, States...>::value>{},
-            state_);
+        return std::visit(detail::name_handler<states_printable>{}, state_);
     }
 
 private:
