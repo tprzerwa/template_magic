@@ -296,7 +296,6 @@ TEST_CASE("TEST state_machine with printable states and throwing transitions")
     REQUIRE( sm.state_name() == StartedPrintableState{}.name() );
 
     sm.handle(Stop{});
-    REQUIRE( sm.in_state<StoppedPrintableState>() );
     REQUIRE( sm.state_name() == StoppedPrintableState{}.name() );
 
     REQUIRE( exception_count == 2 );

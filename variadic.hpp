@@ -45,7 +45,7 @@ using find_t = typename find<T, Ts...>::type;
 
 
 
-template <template<typename> class Predicate, typename T, typename... Ts>
+template <template<typename...> class Predicate, typename T, typename... Ts>
 struct find_if : std::integral_constant<std::size_t, detail::find_if<Predicate, T, Ts...>::value>
 {
     using type = get_t<detail::find_if<Predicate, T, Ts...>::value, T, Ts...>;
@@ -61,11 +61,11 @@ struct all_of
     : std::integral_constant<bool,  detail::all_of<Predicate, Ts...>::value > {};
 
 
-template <template<typename> class Predicate, typename... Ts>
+template <template<typename...> class Predicate, typename... Ts>
 struct any_of : std::integral_constant<bool,  detail::any_of<Predicate, Ts...>::value > {};
 
 
-template <template<typename> class Predicate, typename... Ts>
+template <template<typename...> class Predicate, typename... Ts>
 struct none_of : std::integral_constant<bool,  !detail::any_of<Predicate, Ts...>::value > {};
 
 
@@ -81,10 +81,10 @@ constexpr static std::size_t find_if_v = find_if<Predicate, T, Ts...>::value;
 template <template<typename...> class Predicate, typename... Ts>
 constexpr static bool all_of_v = all_of<Predicate, Ts...>::value;
 
-template <template<typename> class Predicate, typename... Ts>
+template <template<typename...> class Predicate, typename... Ts>
 constexpr static bool any_of_v = any_of<Predicate, Ts...>::value;
 
-template <template<typename> class Predicate, typename... Ts>
+template <template<typename...> class Predicate, typename... Ts>
 constexpr static bool none_of_v = none_of<Predicate, Ts...>::value;
 
 #endif

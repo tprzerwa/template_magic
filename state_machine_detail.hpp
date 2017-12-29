@@ -31,7 +31,7 @@ struct transition_handler<StateMachine, Event, true>
     ~transition_handler() = default;
 
     template <typename State>
-    constexpr auto operator() (State&& state) const noexcept
+    auto operator() (State&& state) const noexcept
         -> decltype(state.handle(event_), void())
     {
         machine_->state_ = state.handle(event_);
@@ -50,7 +50,7 @@ struct transition_handler<StateMachine, Event, false>
     ~transition_handler() = default;
 
     template <typename State>
-    constexpr auto operator() (State&& state) const noexcept
+    auto operator() (State&& state) const noexcept
         -> decltype(state.handle(event_), void())
     {
         machine_->state_ = state.handle(event_);
@@ -65,7 +65,7 @@ template<>
 struct undefined_transition_handler<true>
 {
     template <typename... Args>
-    constexpr void operator() (Args && ... args) const noexcept
+    void operator() (Args && ... args) const noexcept
     {
         swallow(std::forward<Args...>(args)...);
     }
@@ -75,7 +75,7 @@ template<>
 struct undefined_transition_handler<false>
 {
     template <typename... Args>
-    constexpr void operator() (Args && ... args) const
+    void operator() (Args && ... args) const
     {
         swallow(std::forward<Args...>(args)...);
         throw invalid_transition{};
@@ -91,8 +91,8 @@ template<>
 struct name_handler<true>
 {
     template <typename State>
-    constexpr auto operator() (const State& state) const noexcept
-        ->  decltype(state.name(), std::string())
+    auto operator() (const State& state) const noexcept
+        -> decltype(state.name(), std::string())
     {
         return state.name();
     }
@@ -102,14 +102,14 @@ template<>
 struct name_handler<false>
 {
     template <typename State>
-    constexpr auto operator() (const State& state) const
+    auto operator() (const State& state) const
         ->  decltype(state.name(), std::string())
     {
         return state.name();
     }
 
     template <typename... Args>
-    constexpr std::string operator() (Args && ... args) const
+    std::string operator() (Args && ... args) const
     {
         swallow(std::forward<Args...>(args)...);
         throw no_such_member{};

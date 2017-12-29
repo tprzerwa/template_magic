@@ -21,30 +21,38 @@ struct Stop
 {
 	Stop() = default;
 	Stop(const Stop&) = default;
-	Stop(Stop&&) = delete;
+	Stop(Stop&&) = default;
 };
 
 
 // Both StartedPrintableState and StoppedPrintableState have method name().
 
+struct StartedPrintableState;
+
 struct StoppedPrintableState
 {
+	StoppedPrintableState() = default;
+	StoppedPrintableState(const StoppedPrintableState&) = default;
+	// StoppedPrintableState(StoppedPrintableState&&) = default;
     std::string name() const;
-    auto handle(const Start&) const;
+    StartedPrintableState handle(const Start&) const;
 };
 
 struct StartedPrintableState
 {
+	StartedPrintableState() = default;
+	StartedPrintableState(const StartedPrintableState&) = default;
+	// StartedPrintableState(StartedPrintableState&&) = default;
 	std::string name() const;
-    auto handle(const Stop&) const;
+    StoppedPrintableState handle(const Stop&) const;
 };
 
-auto StartedPrintableState::handle(const Stop&) const
+StoppedPrintableState StartedPrintableState::handle(const Stop&) const
 {
     return StoppedPrintableState{};
 }
 
-auto StoppedPrintableState::handle(const Start&) const
+StartedPrintableState StoppedPrintableState::handle(const Start&) const
 {
     return StartedPrintableState{};
 }
@@ -63,23 +71,25 @@ std::string StoppedPrintableState::name() const
 
 // Only StoppedPrintableState has method name().
 
+struct StartedNotPrintableState;
+
 struct StoppedNotPrintableState
 {
     std::string name() const;
-    auto handle(const Start&) const;
+    StartedNotPrintableState handle(const Start&) const;
 };
 
 struct StartedNotPrintableState
 {
-    auto handle(const Stop&) const;
+    StoppedNotPrintableState handle(const Stop&) const;
 };
 
-auto StartedNotPrintableState::handle(const Stop&) const
+StoppedNotPrintableState StartedNotPrintableState::handle(const Stop&) const
 {
     return StoppedNotPrintableState{};
 }
 
-auto StoppedNotPrintableState::handle(const Start&) const
+StartedNotPrintableState StoppedNotPrintableState::handle(const Start&) const
 {
     return StartedNotPrintableState{};
 }

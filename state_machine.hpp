@@ -3,7 +3,6 @@
 
 #include <exception>
 #include <string>
-#include <variant>
 
 #include "sfinae.hpp"
 #include "state_machine_detail.hpp"
@@ -34,13 +33,20 @@ class state_machine
 {
 constexpr static bool silent_transition = TransitionPolicy::safe;
 constexpr static bool states_printable = all_of<has_method_name, States...>::value;
+constexpr static bool any_printable = any_of<has_method_name, States...>::value;
 
 public:
 
-    state_machine(std::variant<States...> state)
-        : state_{ std::move(state) }
-    {
-    }
+    state_machine(variant<States...> state)
+        : state_{ std::move(state) } {}
+
+    // state_machine() = default;
+    // state_machine(const state_machine&) = delete;
+    // state_machine(state_machine&&) = delete;
+    // state_machine& operator= (const state_machine&) = delete;
+    // state_machine& operator= (state_machine&&) = delete;
+    // ~state_machine() = default;
+
 
     template <typename State>
     bool in_state() const noexcept
@@ -51,25 +57,26 @@ public:
     template <typename Event>
     void handle(Event&& event) noexcept(silent_transition)
     {
-        std::visit(
+        visit(
             make_overloaded(
                 detail::transition_handler<state_machine, Event>(this, std::forward<Event>(event)),
                 detail::undefined_transition_handler<silent_transition>{}),
             state_);
     }
 
-    template <typename /* created only if any state has method name() */
-        = typename std::enable_if<any_of<has_method_name, States...>::value>::type>
+    /* created only if any state has method name() */
+    template <typename = typename std::enable_if<any_printable>::type>
     std::string state_name() const noexcept(states_printable)
     {
-        return std::visit(detail::name_handler<states_printable>{}, state_);
+        return visit(detail::name_handler<states_printable>{}, state_);
     }
 
 private:
-    template <typename StateMachine, typename Event>
+    template <typename StateMachine, typename Event, bool>
     friend struct detail::transition_handler;
 
-    std::variant<States...> state_;
+
+    variant<States...> state_;
 };
 
 
