@@ -1,6 +1,10 @@
 #ifndef TPLM_VARIANT_HPP_
 #define TPLM_VARIANT_HPP_
 
+
+#include <type_traits>
+
+
 #if __cplusplus <= 201402L
   #include <boost/variant.hpp>
 #else
@@ -32,11 +36,6 @@ namespace tplm
         {
             return value_.which();
         }
-
-        boost::variant<Ts...>& boost_cast()
-        {
-            return static_cast<boost::variant<Ts...>&>(*this);
-        }
     };
 
     template <typename Visitor, typename Variant>
@@ -64,26 +63,30 @@ template <typename... Ts>
 struct overloaded;
 
 template <typename T>
-struct overloaded<T> : public T
+struct overloaded<T> : public std::remove_reference<T>::type
 {
+    using U = typename std::remove_reference<T>::type;
+
     overloaded(T && t)
-        : T{ std::forward<T>(t) }
+        : U{ std::forward<T>(t) }
     {
     }
 
-    using T::operator();
+    using U::operator();
 };
 
 template <typename T, typename... Ts>
-struct overloaded<T, Ts...> : public T, public overloaded<Ts...>
+struct overloaded<T, Ts...> : public std::remove_reference<T>::type, public overloaded<Ts...>
 {
+    using U = typename std::remove_reference<T>::type;
+
     overloaded(T && t, Ts && ... ts)
-        : T{ std::forward<T>(t) }
+        : U{ std::forward<T>(t) }
         , overloaded<Ts...>{ std::forward<Ts>(ts)... }
     {
     }
 
-    using T::operator();
+    using U::operator();
     using overloaded<Ts...>::operator();
 };
 

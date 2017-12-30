@@ -35,10 +35,19 @@ constexpr static bool silent_transition = TransitionPolicy::safe;
 constexpr static bool states_printable = all_of<has_method_name, States...>::value;
 constexpr static bool any_printable = any_of<has_method_name, States...>::value;
 
+template <typename Event>
+using transition_handler = detail::transition_handler<state_machine, Event>;
+using undefined_handler = detail::undefined_transition_handler<silent_transition>;
+using name_handler = detail::name_handler<states_printable>;
+
 public:
 
     state_machine(variant<States...> state)
-        : state_{ std::move(state) } {}
+        : state_{ std::move(state) }
+        , undefined_handler_{}
+        , name_handler_{}
+    {
+    }
 
     // state_machine() = default;
     // state_machine(const state_machine&) = delete;
@@ -59,8 +68,8 @@ public:
     {
         visit(
             make_overloaded(
-                detail::transition_handler<state_machine, Event>(this, std::forward<Event>(event)),
-                detail::undefined_transition_handler<silent_transition>{}),
+                transition_handler<Event>(this, std::forward<Event>(event)),
+                undefined_handler_),
             state_);
     }
 
@@ -68,7 +77,7 @@ public:
     template <typename = typename std::enable_if<any_printable>::type>
     std::string state_name() const noexcept(states_printable)
     {
-        return visit(detail::name_handler<states_printable>{}, state_);
+        return visit(name_handler_, state_);
     }
 
 private:
@@ -77,6 +86,8 @@ private:
 
 
     variant<States...> state_;
+    undefined_handler undefined_handler_;
+    name_handler name_handler_;
 };
 
 
