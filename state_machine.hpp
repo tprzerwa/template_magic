@@ -66,11 +66,11 @@ public:
     template <typename Event>
     void handle(Event&& event) noexcept(silent_transition)
     {
-        visit(
-            make_overloaded(
+        auto visitor = make_overloaded(
                 transition_handler<Event>(this, std::forward<Event>(event)),
-                undefined_handler_),
-            state_);
+                undefined_handler_);
+
+        visit(visitor, state_);
     }
 
     /* created only if any state has method name() */

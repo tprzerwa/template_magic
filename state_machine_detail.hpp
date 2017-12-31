@@ -22,6 +22,7 @@ struct transition_handler;
 template <typename StateMachine, typename Event>
 struct transition_handler<StateMachine, Event, true>
 {
+    using result_type = void;
     StateMachine *machine_;
     Event event_;
 
@@ -41,6 +42,7 @@ struct transition_handler<StateMachine, Event, true>
 template <typename StateMachine, typename Event>
 struct transition_handler<StateMachine, Event, false>
 {
+    using result_type = void;
     StateMachine *machine_;
     const Event& event_;
 
@@ -64,6 +66,8 @@ struct undefined_transition_handler;
 template<>
 struct undefined_transition_handler<true>
 {
+    using result_type = void;
+
     template <typename... Args>
     void operator() (Args && ... args) const noexcept
     {
@@ -74,6 +78,8 @@ struct undefined_transition_handler<true>
 template<>
 struct undefined_transition_handler<false>
 {
+    using result_type = void;
+
     template <typename... Args>
     void operator() (Args && ... args) const
     {
@@ -90,6 +96,8 @@ struct name_handler;
 template<>
 struct name_handler<true>
 {
+    using result_type = std::string;
+
     template <typename State>
     auto operator() (const State& state) const noexcept
         -> decltype(state.name(), std::string())
@@ -101,6 +109,8 @@ struct name_handler<true>
 template<>
 struct name_handler<false>
 {
+    using result_type = std::string;
+
     template <typename State>
     auto operator() (const State& state) const
         ->  decltype(state.name(), std::string())

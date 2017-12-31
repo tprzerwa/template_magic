@@ -22,14 +22,20 @@ namespace tplm
     {
         boost::variant<Ts...> value_;
 
-        template <typename Arg>
-        variant(Arg && arg) : value_(std::forward<Arg>(arg)) {}
+        template <typename... Args>
+        variant(Args && ... args) : value_(std::forward<Args...>(args)...) {}
 
         template <typename Arg>
         variant& operator= (Arg && arg)
         {
             value_ = std::forward<Arg>(arg);
-            return *this; 
+            return *this;
+        }
+
+        template <typename Arg>
+        bool operator== (Arg && arg)
+        {
+            return value_ == std::forward<Arg>(arg);
         }
 
         constexpr std::size_t index() const noexcept
@@ -38,11 +44,11 @@ namespace tplm
         }
     };
 
-    template <typename Visitor, typename Variant>
-    auto visit(Visitor && vis, Variant& var)
-        -> decltype(boost::apply_visitor(std::forward<Visitor>(vis), var.value_))
+    template <typename Visitor, typename Visitable>
+    auto visit(Visitor& visitor, Visitable& visitable)
+        -> decltype(boost::apply_visitor(visitor, visitable.value_))
     {
-        return boost::apply_visitor(std::forward<Visitor>(vis), var.value_);
+        return boost::apply_visitor(visitor, visitable.value_);
     }
 
 #else  // __cplusplus > 201402L  // std == C++17
@@ -66,6 +72,7 @@ template <typename T>
 struct overloaded<T> : public std::remove_reference<T>::type
 {
     using U = typename std::remove_reference<T>::type;
+    using result_type = typename U::result_type;
 
     overloaded(T && t)
         : U{ std::forward<T>(t) }
@@ -79,6 +86,7 @@ template <typename T, typename... Ts>
 struct overloaded<T, Ts...> : public std::remove_reference<T>::type, public overloaded<Ts...>
 {
     using U = typename std::remove_reference<T>::type;
+    using result_type = typename overloaded<Ts...>::result_type;
 
     overloaded(T && t, Ts && ... ts)
         : U{ std::forward<T>(t) }
