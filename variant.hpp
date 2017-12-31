@@ -4,8 +4,10 @@
 
 #include <type_traits>
 
+#include "compatibility.hpp"
 
-#if __cplusplus <= 201402L
+
+#if BOOST_NEEDED
   #include <boost/variant.hpp>
 #else
   #include <variant>
@@ -15,7 +17,7 @@
 namespace tplm
 {
 
-#if __cplusplus <= 201402L  //  std <= C++14 
+#if BOOST_NEEDED
 
     template <typename... Ts>
     struct variant
@@ -33,7 +35,7 @@ namespace tplm
         }
 
         template <typename Arg>
-        bool operator== (Arg && arg)
+        bool operator== (Arg && arg) const
         {
             return value_ == std::forward<Arg>(arg);
         }
@@ -65,6 +67,8 @@ namespace tplm
 
 #endif
 
+
+
 template <typename... Ts>
 struct overloaded;
 
@@ -72,7 +76,10 @@ template <typename T>
 struct overloaded<T> : public std::remove_reference<T>::type
 {
     using U = typename std::remove_reference<T>::type;
+
+    #if BOOST_NEEDED
     using result_type = typename U::result_type;
+    #endif
 
     overloaded(T && t)
         : U{ std::forward<T>(t) }
@@ -86,7 +93,10 @@ template <typename T, typename... Ts>
 struct overloaded<T, Ts...> : public std::remove_reference<T>::type, public overloaded<Ts...>
 {
     using U = typename std::remove_reference<T>::type;
+
+    #if BOOST_NEEDED && C_PLUS_PLUS_11
     using result_type = typename overloaded<Ts...>::result_type;
+    #endif
 
     overloaded(T && t, Ts && ... ts)
         : U{ std::forward<T>(t) }

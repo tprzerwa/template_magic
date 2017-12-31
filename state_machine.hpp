@@ -42,19 +42,21 @@ using name_handler = detail::name_handler<states_printable>;
 
 public:
 
-    state_machine(variant<States...> state)
-        : state_{ std::move(state) }
+    template <typename State,
+        typename = typename std::enable_if<contains<State, States...>::value>::type>
+    state_machine(State&& state)
+        : state_{ std::forward<State>(state) }
         , undefined_handler_{}
         , name_handler_{}
     {
     }
 
-    // state_machine() = default;
-    // state_machine(const state_machine&) = delete;
-    // state_machine(state_machine&&) = delete;
-    // state_machine& operator= (const state_machine&) = delete;
-    // state_machine& operator= (state_machine&&) = delete;
-    // ~state_machine() = default;
+    state_machine() = default;
+    state_machine(const state_machine&) = delete;
+    state_machine(state_machine&&) = default;
+    state_machine& operator= (const state_machine&) = delete;
+    state_machine& operator= (state_machine&&) = default;
+    ~state_machine() = default;
 
 
     template <typename State>

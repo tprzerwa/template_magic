@@ -70,6 +70,11 @@ struct none_of : std::integral_constant<bool,  !detail::any_of<Predicate, Ts...>
 
 
 
+template <typename T, typename... Ts>
+struct contains : std::integral_constant<bool, std::is_same<T, find_t<T, Ts...>>::value > {};
+
+
+
 #if __cplusplus >= 201402L
 
 template <typename T, typename... Ts>
@@ -86,6 +91,9 @@ constexpr static bool any_of_v = any_of<Predicate, Ts...>::value;
 
 template <template<typename...> class Predicate, typename... Ts>
 constexpr static bool none_of_v = none_of<Predicate, Ts...>::value;
+
+template <typename T, typename... Ts>
+constexpr static bool contains_v = contains<T, Ts...>::value;
 
 #endif
 
